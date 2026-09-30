@@ -19,7 +19,7 @@ models:
 
 datasets:
   - type: choices13k
-    path: data/choices13k/c13k_selections.csv
+    path: datasets/c13k_selections.csv
 
   - type: cpc18
-    path: data/cpc18/cpc18.csv
+    path: datasets/cpc18.csv

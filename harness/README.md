@@ -11,10 +11,11 @@ uv pip install -e ".[laya,frontier,local]"
 
 ## Data
 
-Place datasets in `harness/data/`:
+Download datasets to `datasets/`:
 
-- `choices13k/c13k_selections.csv` — from https://github.com/jcpeterson/choices13k
-- `cpc18/cpc18.csv` — from http://cpc-18.com
+```bash
+python datasets/download.py choices13k cpc18
+```
 
 ## Run
 
