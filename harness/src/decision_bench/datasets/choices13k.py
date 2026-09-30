@@ -13,7 +13,14 @@ class Choices13kDataset(BaseDataset):
             for row in reader:
                 gamble_a = f"Outcome {row['Ha']} with probability {row['pHa']}, otherwise {row['La']}"
                 gamble_b = f"Lottery with expected value {row['Hb']}, probability {row['pHb']}, otherwise {row['Lb']}"
-                state = f"Gamble A: {gamble_a}\nGamble B: {gamble_b}"
+                instructions = (
+                    "Please select option A or B.\n"
+                    "Earning a Bonus. At the end of the experiment, one reward will be selected at random "
+                    "from all the rewards you earned during the experiment. A fixed proportion (10%) of "
+                    "this value will be paid to you as your performance bonus for the task. "
+                    "If the sampled reward is negative, your bonus is set to $0.00."
+                )
+                state = f"{instructions}\n\nGamble A: {gamble_a}\nGamble B: {gamble_b}"
                 if row.get("Amb") == "1":
                     state += "\n(Probabilities for Gamble B are unknown)"
 
