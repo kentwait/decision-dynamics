@@ -128,11 +128,20 @@ def main():
     parser.add_argument("--config", required=True, help="Path to config YAML")
     parser.add_argument("--output-dir", default="results", help="Output directory")
     parser.add_argument("--limit", type=int, help="Limit number of problems")
+    parser.add_argument(
+        "--models",
+        nargs="+",
+        help="Model types to run (default: all). Choices: laya, jev, openjev, llm_local, llm_frontier",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
 
-    for model_config in config["models"]:
+    models = config["models"]
+    if args.models:
+        models = [m for m in models if m["type"] in args.models]
+
+    for model_config in models:
         for dataset_config in config["datasets"]:
             summary = run_experiment(model_config, dataset_config, args.output_dir, args.limit)
             print(f"\n{summary['model']} on {summary['dataset']}:")
