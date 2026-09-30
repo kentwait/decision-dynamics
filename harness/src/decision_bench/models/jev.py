@@ -12,17 +12,25 @@ class JevModel(BaseModel):
     def predict(self, state: str, question: str, options: list[str]) -> ModelPrediction:
         start = time.time()
         try:
+            criteria = {opt: None for opt in options}
             resp = requests.post(
-                f"{self.base_url}/evaluate",
+                f"{self.base_url}/systemone",
                 headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"},
                 json={
                     "state": state,
-                    "questions": [{"type": "choice", "text": question, "options": options}],
+                    "model": "jev-latest",
+                    "questions": {
+                        "choice": {
+                            "type": "choice",
+                            "instructions": question,
+                            "criteria": criteria,
+                        }
+                    },
                 },
                 timeout=30,
             )
             resp.raise_for_status()
-            result = resp.json()["results"][0]
+            result = resp.json()["answers"]["choice"]
             latency = (time.time() - start) * 1000
 
             return ModelPrediction(
