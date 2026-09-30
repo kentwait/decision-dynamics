@@ -106,6 +106,7 @@ def run_experiment(model_config: dict, dataset_config: dict, output_dir: str, li
                 "human_choice_rate": prob.human_choice_rate,
                 "correct": correct,
                 "latency_ms": pred.latency_ms,
+                "raw_output": pred.raw_output,
             }
             f.write(json.dumps(record) + "\n")
             f.flush()
