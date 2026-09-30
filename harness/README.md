@@ -6,7 +6,7 @@ Benchmark harness for comparing decision models (Jev, Laya, OpenJev) and LLMs (l
 
 ```bash
 cd harness
-pip install -e ".[laya,frontier,local]"
+uv pip install -e ".[laya,frontier,local]"
 ```
 
 ## Data
