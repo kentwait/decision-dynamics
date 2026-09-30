@@ -1,0 +1,25 @@
+models:
+  - type: laya
+    checkpoint: convaiinnovations/laya-typed-decisions
+    device: cpu
+
+  - type: jev
+    base_url: https://api.typesafe.ai/v1
+
+  - type: openjev
+    base_url: http://localhost:8000
+
+  - type: llm_local
+    model: llama3.1:8b
+    base_url: http://localhost:11434
+
+  - type: llm_frontier
+    model: gpt-4o
+    provider: openai
+
+datasets:
+  - type: choices13k
+    path: data/choices13k/c13k_selections.csv
+
+  - type: cpc18
+    path: data/cpc18/cpc18.csv
