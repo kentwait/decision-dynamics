@@ -1,3 +1,0 @@
-type: llm_local
-model: llama3.1:8b
-base_url: http://localhost:11434

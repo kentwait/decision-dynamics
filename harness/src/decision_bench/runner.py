@@ -12,8 +12,7 @@ from decision_bench.datasets.cpc18 import CPC18Dataset
 from decision_bench.metrics import Metrics
 from decision_bench.models.jev import JevModel
 from decision_bench.models.laya import LayaModel
-from decision_bench.models.llm_frontier import FrontierLLMModel
-from decision_bench.models.llm_local import LocalLLMModel
+from decision_bench.models.llm import LLMModel
 from decision_bench.models.openjev import OpenJevModel
 
 
@@ -36,15 +35,12 @@ def build_model(config: dict):
         )
     elif model_type == "openjev":
         return OpenJevModel(base_url=config.get("base_url", "http://localhost:8000"))
-    elif model_type == "llm_local":
-        return LocalLLMModel(
-            model=config.get("model", "llama3.1:8b"),
-            base_url=config.get("base_url", "http://localhost:11434"),
-        )
-    elif model_type == "llm_frontier":
-        return FrontierLLMModel(
-            model=config.get("model", "gpt-4o"),
-            provider=config.get("provider", "openai"),
+    elif model_type in ("llm-low", "llm-high"):
+        return LLMModel(
+            model_name=config.get("model_name", ""),
+            base_url=config.get("base_url", "https://openrouter.ai/api/v1"),
+            api_type=config.get("api_type", "chat_completions"),
+            api_key=config.get("api_key", ""),
         )
     else:
         raise ValueError(f"Unknown model type: {model_type}")

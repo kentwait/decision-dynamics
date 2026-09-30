@@ -1,0 +1,5 @@
+type: llm-low
+model_name: google/gemini-2.0-flash-001
+base_url: https://openrouter.ai/api/v1
+api_type: chat_completions
+api_key: ""
