@@ -22,4 +22,4 @@ datasets:
     path: datasets/c13k_selections.csv
 
   - type: cpc18
-    path: datasets/cpc18.csv
+    path: datasets/cpc18_aggregated.csv

@@ -21,3 +21,6 @@
 # Environment
 .env
 .env.local
+
+# Datasets (downloadable via datasets/download.py)
+datasets/*.csv

@@ -9,7 +9,7 @@ DATASETS = {
         "filename": "c13k_selections.csv",
     },
     "cpc18": {
-        "url": "https://raw.githubusercontent.com/jcpeterson/choices13k/main/cpc18.csv",
+        "url": "https://zenodo.org/records/2571510/files/all%20CPC18%20raw%20data.csv?download=1",
         "filename": "cpc18.csv",
     },
 }
