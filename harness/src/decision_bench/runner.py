@@ -123,10 +123,26 @@ def run_experiment(model_config: dict, dataset_config: dict, output_dir: str, li
     return summary
 
 
+def discover_run_configs(runs_dir: str = "runs") -> list[dict]:
+    configs = []
+    runs_path = Path(runs_dir)
+    if not runs_path.exists():
+        return configs
+    for yaml_file in sorted(runs_path.glob("*.yaml")):
+        config = load_config(str(yaml_file))
+        if not config.get("api_key"):
+            print(f"Skipping {yaml_file.name}: api_key is empty")
+            continue
+        config["_name"] = yaml_file.stem
+        configs.append(config)
+    return configs
+
+
 def main():
     parser = argparse.ArgumentParser(description="Benchmark decision models vs LLMs vs humans")
-    parser.add_argument("--config", required=True, help="Path to config YAML")
-    parser.add_argument("--output-dir", default="results", help="Output directory")
+    parser.add_argument("--config", help="Path to config YAML (legacy mode)")
+    parser.add_argument("--runs-dir", default="runs", help="Directory with per-arm YAML configs")
+    parser.add_argument("--output-dir", default="results", help="Output directory (legacy mode)")
     parser.add_argument("--limit", type=int, help="Limit number of problems")
     parser.add_argument(
         "--models",
@@ -135,18 +151,35 @@ def main():
     )
     args = parser.parse_args()
 
-    config = load_config(args.config)
+    dataset_configs = [
+        {"type": "choices13k", "path": "datasets/c13k_selections.csv"},
+        {"type": "cpc18", "path": "datasets/cpc18_aggregated.csv"},
+    ]
 
-    models = config["models"]
-    if args.models:
-        models = [m for m in models if m["type"] in args.models]
+    if args.config:
+        config = load_config(args.config)
+        models = config["models"]
+        if args.models:
+            models = [m for m in models if m["type"] in args.models]
+        for model_config in models:
+            for dataset_config in config["datasets"]:
+                summary = run_experiment(model_config, dataset_config, args.output_dir, args.limit)
+                print(f"\n{summary['model']} on {summary['dataset']}:")
+                for k, v in summary["metrics"].items():
+                    print(f"  {k}: {v:.4f}" if isinstance(v, float) else f"  {k}: {v}")
+    else:
+        run_configs = discover_run_configs(args.runs_dir)
+        if args.models:
+            run_configs = [c for c in run_configs if c["type"] in args.models]
 
-    for model_config in models:
-        for dataset_config in config["datasets"]:
-            summary = run_experiment(model_config, dataset_config, args.output_dir, args.limit)
-            print(f"\n{summary['model']} on {summary['dataset']}:")
-            for k, v in summary["metrics"].items():
-                print(f"  {k}: {v:.4f}" if isinstance(v, float) else f"  {k}: {v}")
+        for model_config in run_configs:
+            model_name = model_config["_name"]
+            output_dir = str(Path(args.runs_dir) / model_name)
+            for dataset_config in dataset_configs:
+                summary = run_experiment(model_config, dataset_config, output_dir, args.limit)
+                print(f"\n{summary['model']} on {summary['dataset']}:")
+                for k, v in summary["metrics"].items():
+                    print(f"  {k}: {v:.4f}" if isinstance(v, float) else f"  {k}: {v}")
 
 
 if __name__ == "__main__":
