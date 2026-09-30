@@ -24,3 +24,8 @@
 
 # Datasets (downloadable via datasets/download.py)
 datasets/*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
