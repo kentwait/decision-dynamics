@@ -68,43 +68,47 @@ def run_experiment(model_config: dict, dataset_config: dict, output_dir: str, li
     if limit:
         problems = problems[:limit]
 
-    metrics = Metrics()
-    results = []
-
-    for prob in tqdm(problems, desc=f"{model.name()} on {dataset.name()}"):
-        pred = model.predict(prob.state, prob.question, prob.options)
-
-        if pred.error:
-            results.append({
-                "problem_id": prob.problem_id,
-                "error": pred.error,
-                "latency_ms": pred.latency_ms,
-            })
-            continue
-
-        correct = pred.choice == prob.options[0] if pred.probability and pred.probability > 0.5 else pred.choice == prob.options[1]
-        human_preferred = prob.options[0] if prob.human_choice_rate > 0.5 else prob.options[1]
-        correct = pred.choice == human_preferred
-
-        metrics.update(
-            predicted_prob=pred.probability or 0.5,
-            human_choice_rate=prob.human_choice_rate,
-            confidence=pred.confidence or 0.5,
-            correct=correct,
-        )
-
-        results.append({
-            "problem_id": prob.problem_id,
-            "predicted_choice": pred.choice,
-            "predicted_probability": pred.probability,
-            "confidence": pred.confidence,
-            "human_choice_rate": prob.human_choice_rate,
-            "correct": correct,
-            "latency_ms": pred.latency_ms,
-        })
-
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
+
+    metrics = Metrics()
+    predictions_file = output_path / f"{model.name()}_{dataset.name()}_predictions.jsonl"
+
+    with open(predictions_file, "w") as f:
+        for prob in tqdm(problems, desc=f"{model.name()} on {dataset.name()}"):
+            pred = model.predict(prob.state, prob.question, prob.options)
+
+            if pred.error:
+                record = {
+                    "problem_id": prob.problem_id,
+                    "error": pred.error,
+                    "latency_ms": pred.latency_ms,
+                }
+                f.write(json.dumps(record) + "\n")
+                f.flush()
+                continue
+
+            human_preferred = prob.options[0] if prob.human_choice_rate > 0.5 else prob.options[1]
+            correct = pred.choice == human_preferred
+
+            metrics.update(
+                predicted_prob=pred.probability or 0.5,
+                human_choice_rate=prob.human_choice_rate,
+                confidence=pred.confidence or 0.5,
+                correct=correct,
+            )
+
+            record = {
+                "problem_id": prob.problem_id,
+                "predicted_choice": pred.choice,
+                "predicted_probability": pred.probability,
+                "confidence": pred.confidence,
+                "human_choice_rate": prob.human_choice_rate,
+                "correct": correct,
+                "latency_ms": pred.latency_ms,
+            }
+            f.write(json.dumps(record) + "\n")
+            f.flush()
 
     summary = {
         "model": model.name(),
@@ -115,10 +119,6 @@ def run_experiment(model_config: dict, dataset_config: dict, output_dir: str, li
 
     with open(output_path / f"{model.name()}_{dataset.name()}_summary.json", "w") as f:
         json.dump(summary, f, indent=2)
-
-    with open(output_path / f"{model.name()}_{dataset.name()}_predictions.jsonl", "w") as f:
-        for r in results:
-            f.write(json.dumps(r) + "\n")
 
     return summary
 
