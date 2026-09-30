@@ -18,7 +18,7 @@ class Choices13kDataset(BaseDataset):
                     state += "\n(Probabilities for Gamble B are unknown)"
 
                 problems.append(DecisionProblem(
-                    problem_id=row["problem"],
+                    problem_id=row["Problem"],
                     state=state,
                     question="Which gamble should be chosen?",
                     options=["A", "B"],
