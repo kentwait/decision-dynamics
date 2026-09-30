@@ -123,13 +123,16 @@ def run_experiment(model_config: dict, dataset_config: dict, output_dir: str, li
     return summary
 
 
-def discover_run_configs(runs_dir: str = "runs") -> list[dict]:
+def discover_run_configs(runs_dir: str = "runs", model_filter: list[str] | None = None) -> list[dict]:
     configs = []
     runs_path = Path(runs_dir)
     if not runs_path.exists():
         return configs
     for yaml_file in sorted(runs_path.glob("*.yaml")):
         config = load_config(str(yaml_file))
+        if model_filter and config.get("type") not in model_filter:
+            print(f"Skipping {yaml_file.name}: not requested")
+            continue
         if not config.get("api_key"):
             print(f"Skipping {yaml_file.name}: api_key is empty")
             continue
@@ -168,9 +171,7 @@ def main():
                 for k, v in summary["metrics"].items():
                     print(f"  {k}: {v:.4f}" if isinstance(v, float) else f"  {k}: {v}")
     else:
-        run_configs = discover_run_configs(args.runs_dir)
-        if args.models:
-            run_configs = [c for c in run_configs if c["type"] in args.models]
+        run_configs = discover_run_configs(args.runs_dir, model_filter=args.models)
 
         for model_config in run_configs:
             model_name = model_config["_name"]
